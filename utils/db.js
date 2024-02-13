@@ -2,7 +2,7 @@
 
 const { MongoClient } = require('mongodb');
 const mongo = require('mongodb');
-// const pwdHashed = require('./utils');
+const { pwdHashed } = require('./utils');
 
 class DBClient {
   constructor() {
@@ -14,7 +14,7 @@ class DBClient {
     this.client = new MongoClient(dbUrl, { useUnifiedTopology: true });
     this.client.connect().then(() => {
       this.connected = true;
-    }).catch((err) => console.error(err.message));
+    }).catch((err) => console.log(err.message));
   }
 
   isAlive() {
@@ -23,14 +23,21 @@ class DBClient {
 
   async nbUsers() {
     await this.client.connect();
-    const userCount = await this.client.db(this.database).collection('users').countDocuments();
-    return userCount;
+    const users = await this.client.db(this.database).collection('users').countDocuments();
+    return users;
   }
 
   async nbFiles() {
     await this.client.connect();
     const users = await this.client.db(this.database).collection('files').countDocuments();
     return users;
+  }
+
+  async createUser(email, password) {
+    const hashedPwd = pwdHashed(password);
+    await this.client.connect();
+    const user = await this.client.db(this.database).collection('users').insertOne({ email, password: hashedPwd });
+    return user;
   }
 
   async getUser(email) {
