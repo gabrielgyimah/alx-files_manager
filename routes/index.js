@@ -1,4 +1,5 @@
 #!/usr/bin/node
+
 /* eslint-disable */
 
 const express = require('express');
